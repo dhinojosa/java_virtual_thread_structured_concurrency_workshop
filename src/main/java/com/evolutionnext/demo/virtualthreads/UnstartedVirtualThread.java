@@ -5,12 +5,17 @@ package com.evolutionnext.demo.virtualthreads;
  */
 public class UnstartedVirtualThread {
     public static void main(String[] args) throws InterruptedException {
-        Thread unstartedThread = Thread.ofVirtual().unstarted(() -> {
-            System.out.printf("Starting Thread in %s", Thread.currentThread());
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+
+        Thread unstartedThread = Thread.ofVirtual().unstarted(
+            new Runnable() {
+            @Override
+            public void run() {
+                System.out.printf("Starting Thread in %s", Thread.currentThread());
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 

@@ -14,10 +14,10 @@ public class GoAheadAndBlockVirtualThread {
     public static void main(String[] args)
         throws InterruptedException {
 
-        System.out.printf("The Process ID is %d",
-            ProcessHandle.current().pid());
-
-        Thread.sleep(30000);
+//        System.out.printf("The Process ID is %d",
+//            ProcessHandle.current().pid());
+//
+//        Thread.sleep(30000);
 
         long startTime = System.currentTimeMillis();
         ThreadFactory tf = Thread
@@ -26,15 +26,15 @@ public class GoAheadAndBlockVirtualThread {
             .factory();
         try (
             ExecutorService executorService = Executors.newThreadPerTaskExecutor(tf)) {
-//            ExecutorService executorService = Executors.newFixedThreadPool(10)) {
+            //ExecutorService executorService = Executors.newFixedThreadPool(10)) {
             Stream<Callable<Integer>> callableStream =
                 Stream.iterate(0, integer -> integer + 1).map(i -> () -> {
                     System.out.format("Process(%d) Started: inside of Thread " +
-                            "%s\n",
+                                      "%s\n",
                         i, Thread.currentThread());
                     Thread.sleep(5000); //Block
                     System.out.format("Process(%d) Finished: Inside of Thread" +
-                            " %s\n"
+                                      " %s\n"
                         , i, Thread.currentThread());
                     return 100;
                 });
@@ -42,11 +42,12 @@ public class GoAheadAndBlockVirtualThread {
             List<Callable<Integer>> callables =
                 callableStream.limit(80).toList();
             executorService.invokeAll(callables);
-//            executorService.shutdown();
+
             System.out.println("Done:" + (System.currentTimeMillis() - startTime));
 
 
-            Thread.sleep(30000);
+            Thread.sleep(10000);
+            executorService.shutdown();
         }
     }
 }

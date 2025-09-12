@@ -30,7 +30,7 @@ public class StructuredConcurrencyScopedValues {
      */
     private static void runScopeValueFirst() {
         ScopedValue.where(KEY, "Hello").run(() -> {
-            try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+            try (var scope = StructuredTaskScope.open(StructuredTaskScope.Joiner.anySuccessfulResultOrThrow())) {
                 scope.fork(() -> {
                     printThreadAndKey("Inside fork");
                     return null;
@@ -52,7 +52,7 @@ public class StructuredConcurrencyScopedValues {
      * and then the `StructuredTaskScope`
      */
     private static void runScopeValueLast() {
-        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+        try (var scope = StructuredTaskScope.open(StructuredTaskScope.Joiner.anySuccessfulResultOrThrow())) {
             ScopedValue.where(KEY, "Hello").run(() -> {
                 try {
                     scope.fork(() -> {

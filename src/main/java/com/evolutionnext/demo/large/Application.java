@@ -1,4 +1,4 @@
-package com.evolutionnext.demo.combined.large;
+package com.evolutionnext.demo.large;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -7,7 +7,8 @@ import java.util.concurrent.StructuredTaskScope;
 import java.util.function.Supplier;
 
 public class Application {
-    private static ScopedValue<String> KEY = ScopedValue.newInstance();
+    //private preferred, but protected or package protected is allowed
+    static final ScopedValue<String> KEY = ScopedValue.newInstance();
 
     public static void main(String[] args) {
         ScopedValue.where(KEY, "Hello").run(task());
@@ -18,16 +19,15 @@ public class Application {
     private static Runnable task() {
         return () -> {
             printThreadAndKey("In task, before structured scope");
-            try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
-
+            try (var scope = StructuredTaskScope.open(StructuredTaskScope.Joiner.anySuccessfulResultOrThrow())) {
                 printThreadAndKey("In task, in structured scope");
                 Supplier<String> string = scope.fork(() -> {
-                    Repository repository = new Repository(KEY);
+                    Repository repository = new Repository();
                     Service service = new Service(repository);
                     return service.run();
                 });
                 scope.join();
-                System.out.println(STR."Result is \{string.get()}");
+                System.out.format("Result is %s", string.get());
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

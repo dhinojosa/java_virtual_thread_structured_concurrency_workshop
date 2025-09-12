@@ -6,7 +6,7 @@ import java.util.NoSuchElementException;
  * 1. Main Thread Scoped Values
  */
 public class MainThreadScopedValues {
-    private static ScopedValue<String> KEY = ScopedValue.newInstance();
+    private static final ScopedValue<String> KEY = ScopedValue.newInstance();
 
     /**
      * The main method in the ChainedScopedValues class.

@@ -1,4 +1,4 @@
-package com.evolutionnext.demo.combined.large;
+package com.evolutionnext.demo.large;
 
 import java.util.concurrent.StructuredTaskScope;
 
@@ -11,11 +11,11 @@ public class Service {
     }
 
     public String run() {
-        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+        try (var scope = StructuredTaskScope.open(StructuredTaskScope.Joiner.<String>allSuccessfulOrThrow())) {
             var id = scope.fork(repository::persist);
             var employee = scope.fork(repository::find);
             scope.join();
-            return STR."Found id of \{id.get()} and employee \{employee.get()}";
+            return String.format("Found id of %s and employee %s", id, employee);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

@@ -48,7 +48,7 @@ public class AccountingServiceTest {
         UserService userService = new UserService();
         InvoiceService invoiceService = new InvoiceService();
         AccountingService accountingService = new AccountingService(userService, invoiceService);
-        Assertions.assertThatThrownBy(() -> accountingService.findAllInvoicesByUserWithFailedUserService(90L))
+        Assertions.assertThatThrownBy(() -> accountingService.findAllInvoicesByUserWithLatencyService(90L))
             .isInstanceOf(ExecutionException.class);
     }
 

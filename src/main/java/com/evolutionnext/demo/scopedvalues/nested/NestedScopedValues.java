@@ -27,13 +27,15 @@ public class NestedScopedValues {
      */
     private static void runNestedScopedValues() {
         ScopedValue.where(KEY, "Do").run(() ->
-            ScopedValue.where(KEY, "Ra").run(() ->
-                ScopedValue.where(KEY, "Me").run(() ->
-                    ScopedValue.where(KEY, "Fa").run(() ->
-                        ScopedValue.where(KEY, "So").run(() ->
-                            ScopedValue.where(KEY, "La").run(() ->
-                                ScopedValue.where(KEY, "Te").run(() ->
-                                        printThreadAndKey("Inside the nest"))))))));
+            ScopedValue.where(KEY, "Ra"+ KEY.get()).run(() ->
+                ScopedValue.where(KEY, "Me"+ KEY.get()).run(() ->
+                    ScopedValue.where(KEY, "Fa"+ KEY.get()).run(() ->
+                        ScopedValue.where(KEY, "So" + KEY.get()).run(() ->
+                            ScopedValue.where(KEY, "La" + KEY.get()).run(() ->
+                                ScopedValue.where(KEY, "Te" + KEY.get()).run(() -> {
+                                        printThreadAndKey("Inside the nest");
+                                }
+                            )))))));
         printThreadAndKey("Outside of the chain");
     }
 

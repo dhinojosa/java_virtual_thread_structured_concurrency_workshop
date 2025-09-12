@@ -1,12 +1,9 @@
-package com.evolutionnext.demo.combined.large;
+package com.evolutionnext.demo.large;
 
 import java.util.NoSuchElementException;
 
 public class Repository {
-    private final ScopedValue<String>  key;
-
-    public Repository(ScopedValue<String> key) {
-        this.key = key;
+    public Repository() {
     }
 
     public Long persist() {
@@ -15,7 +12,7 @@ public class Repository {
     }
 
     public Employee find() {
-        return ScopedValue.where(key, "Buenos Dias").get(() -> {
+        return ScopedValue.where(Application.KEY, "Buenos Dias").call(() -> {
             printThreadAndKey("In Repository#find()");
             return new Employee("James", "Gosling");
         });
@@ -23,7 +20,7 @@ public class Repository {
 
     private void printThreadAndKey(String label) {
         try {
-            System.out.format("%s: %s contains key \"%s\"\n", label, Thread.currentThread(), key.get());
+            System.out.format("%s: %s contains key \"%s\"\n", label, Thread.currentThread(), Application.KEY.get());
         } catch (NoSuchElementException e) {
             System.out.format("%s: %s has no key!\n", label, Thread.currentThread());
         }

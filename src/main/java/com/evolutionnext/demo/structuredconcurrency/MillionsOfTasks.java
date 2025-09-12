@@ -12,14 +12,14 @@ public class MillionsOfTasks {
     }
 
     public void submit() throws InterruptedException, ExecutionException {
-        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+        try (var scope = StructuredTaskScope.open(StructuredTaskScope.Joiner.anySuccessfulResultOrThrow())) {
             for (int i = 0; i < 1000000; i++) {
                 scope.fork(() -> {
                     System.out.printf("Freddy Rules - %d on Thread[%s]%n", atomicLong.incrementAndGet(), Thread.currentThread());
                     return 3 + 3;
                 });
             }
-            scope.join().throwIfFailed();
+            scope.join();
             System.out.println("Complete");
         }
     }
