@@ -4,7 +4,7 @@
 
 
 ## Introduction
-* 
+
 * Name
 * What do you do?
 * What is your experience with Java?
