@@ -9,7 +9,7 @@
 * What do you do?
 * What is your experience with Java?
 * What IDE do you usually use?
-* How would you grade (Novice, Intermediate, Advanced) your experience with Lambdas/Streams/Optionals?
+* How would you grade your Java expertise (Novice, Intermediate, Advanced)
 * What Operating System do you use for work/home?
 * What Java version are you using for work/home?
 * What other JVM languages do you use?
