@@ -16,7 +16,7 @@
 
 ## 💡 Using Codespaces for This Workshop
 
-We recommend GitHub Codespaces (4-core, 16 GB) to run Kafka, Java, and Docker together. This is already configured for you.
+We recommend GitHub Codespaces (4-core, 16 GB) to run Java, and Docker together. This is already configured for you.
 
 **You do NOT need a credit card**.
 
