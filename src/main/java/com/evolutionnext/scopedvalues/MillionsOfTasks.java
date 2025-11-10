@@ -1,4 +1,4 @@
-package com.evolutionnext.demo.structuredconcurrency;
+package com.evolutionnext.scopedvalues;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.StructuredTaskScope;

@@ -1,6 +1,5 @@
-package com.evolutionnext.demo.structuredconcurrency;
+package com.evolutionnext.structuredconcurrency;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;

@@ -1,4 +1,4 @@
-package com.evolutionnext.demo.virtualthreads;
+package com.evolutionnext.virtualthreads;
 
 import java.util.List;
 import java.util.concurrent.Callable;

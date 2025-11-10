@@ -1,4 +1,4 @@
-package com.evolutionnext.demo.structuredconcurrency;
+package com.evolutionnext.structuredconcurrency;
 
 import java.util.List;
 

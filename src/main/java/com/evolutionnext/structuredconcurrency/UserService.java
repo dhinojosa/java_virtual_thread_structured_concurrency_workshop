@@ -1,4 +1,4 @@
-package com.evolutionnext.demo.structuredconcurrency;
+package com.evolutionnext.structuredconcurrency;
 
 public class UserService {
     public User findUser(Long id) {

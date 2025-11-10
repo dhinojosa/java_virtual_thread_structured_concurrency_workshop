@@ -1,10 +1,11 @@
-package com.evolutionnext.demo.structuredconcurrency;
+package com.evolutionnext.structuredconcurrency;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.StructuredTaskScope;
 import java.util.concurrent.TimeoutException;
 
 public class AccountingServiceTest {
@@ -40,7 +41,7 @@ public class AccountingServiceTest {
         InvoiceService invoiceService = new InvoiceService();
         AccountingService accountingService = new AccountingService(userService, invoiceService);
         Assertions.assertThatThrownBy(() -> accountingService.findAllInvoicesByUserWithFailedUserService(90L))
-            .isInstanceOf(ExecutionException.class);
+            .isInstanceOf(StructuredTaskScope.FailedException.class);
     }
 
     @Test
@@ -49,7 +50,7 @@ public class AccountingServiceTest {
         InvoiceService invoiceService = new InvoiceService();
         AccountingService accountingService = new AccountingService(userService, invoiceService);
         Assertions.assertThatThrownBy(() -> accountingService.findAllInvoicesByUserWithLatencyService(90L))
-            .isInstanceOf(ExecutionException.class);
+            .isInstanceOf(StructuredTaskScope.FailedException.class);
     }
 
     @Test
