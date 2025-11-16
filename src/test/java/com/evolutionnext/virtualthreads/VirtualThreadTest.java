@@ -1,22 +1,53 @@
 package com.evolutionnext.virtualthreads;
 
+import com.sun.management.HotSpotDiagnosticMXBean;
+import jdk.jfr.Configuration;
+import jdk.jfr.Recording;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
+import org.openjdk.jol.info.GraphLayout;
 
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.Method;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.ParseException;
 import java.util.concurrent.*;
 
 public class VirtualThreadTest {
+
+    private Recording recording;
+    private String testName;
+
+    @BeforeEach
+    void setUp(TestInfo testInfo) throws IOException, ParseException {
+        testName = testInfo.getTestClass().map(Class::getSimpleName).orElse("UnknownClass")
+                   + "_" +
+                   testInfo.getTestMethod().map(Method::getName).orElse("UnknownMethod");
+        Configuration profile = Configuration.getConfiguration("profile");
+        recording = new Recording(profile);
+        recording.enable("jdk.VirtualThreadStart");
+        recording.enable("jdk.VirtualThreadEnd");
+        recording.enable("jdk.ExecutionSample");
+        recording.enable("jdk.ObjectAllocationInNewTLAB");
+        recording.enable("jdk.ObjectAllocationOutsideTLAB");
+        recording.setName(testName);
+        recording.start();
+    }
+
     @Test
     void testVirtualThreadUnstarted() throws InterruptedException {
         Thread unstartedThread = Thread.ofVirtual().unstarted(
-            new Runnable() {
-                @Override
-                public void run() {
-                    System.out.printf("Starting Thread in %s", Thread.currentThread());
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
+            () -> {
+                System.out.printf("Starting Thread in %s", Thread.currentThread());
+                try {
+                    System.out.println("Runnable class: " + this.getClass());
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             });
 
@@ -25,6 +56,9 @@ public class VirtualThreadTest {
 
         System.out.println("Waiting for Thread to finish");
         unstartedThread.join();
+        System.setProperty("jol.magicFieldOffset", String.valueOf(true));
+        System.out.println(GraphLayout.parseInstance(unstartedThread).toFootprint());
+
     }
 
     @Test
@@ -78,6 +112,22 @@ public class VirtualThreadTest {
     @Test
     void testVirtualThreadWithAPoolFactory() throws ExecutionException, InterruptedException {
         ThreadFactory tf =
+            Thread.ofVirtual().name("virtual-factory").factory();
+
+        Thread thread = tf.newThread(() -> {
+            System.out.format("Running in Thread: %s\n",
+                Thread.currentThread());
+            System.out.format("Is our thread virtual? %b\n",
+                Thread.currentThread().isVirtual());
+        });
+
+        thread.start();
+        thread.join();
+    }
+
+    @Test
+    void testVirtualThreadWithAPoolFactoryAndExecutorService() throws ExecutionException, InterruptedException {
+        ThreadFactory tf =
             Thread.ofVirtual().name("virtual-with-executors").factory();
         try (ExecutorService executorService = Executors.newThreadPerTaskExecutor(tf)) {
             Future<Integer> future = executorService.submit(() -> {
@@ -91,50 +141,6 @@ public class VirtualThreadTest {
         }
     }
 
-    @Test
-    void testFutureWithNoGetAndAnError() throws InterruptedException {
-        ExecutorService pool = Executors.newSingleThreadExecutor();
-        pool.submit(() -> {
-            System.out.println("Running in Thread:");
-            // Exception thrown here
-            int x = 1 / 0;
-            System.out.println(x);
-        });
-        Thread.sleep(1000);
-        pool.shutdown();
-    }
-
-    @Test
-    void testWithCompletableFuture() {
-        ExecutorService pool = Executors.newFixedThreadPool(2);
-        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
-            System.out.println("Running in Thread:");
-            int x = 1 / 0;
-            System.out.println(x);
-            return 100;
-        }, pool);
-        future.whenComplete((result, throwable) -> {
-            if (throwable != null) {
-                System.out.println("There was an error");
-                throwable.printStackTrace();
-            } else {
-                System.out.println("Result is " + result);
-            }
-        });
-        pool.shutdown();
-        System.out.println("Done");
-
-    }
-
-    @Test
-    void testStackTraceWithVirtualThread() throws InterruptedException {
-        Thread t = Thread.ofVirtual().start(() -> {
-            System.out.println("Running in Thread:");
-            int x = 1 / 0;
-            System.out.println(x);
-        });
-        Thread.sleep(1000);
-    }
 
     @Test
     void testComposingVirtualThreads() throws InterruptedException {
@@ -152,5 +158,19 @@ public class VirtualThreadTest {
         });
         System.out.println("Waiting for Thread to finish");
         startedThread.join();
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        Path path = Paths.get(String.format("%s.jfr", testName));
+        Path hprofPath = Paths.get(String.format("%s.hprof", testName));
+
+        recording.stop();
+        recording.dump(path);
+        recording.close();
+
+        boolean deleted = hprofPath.toFile().delete();
+        HotSpotDiagnosticMXBean mxBean = ManagementFactory.getPlatformMXBean(HotSpotDiagnosticMXBean.class);
+        mxBean.dumpHeap(String.valueOf(hprofPath.toFile()), true);
     }
 }
