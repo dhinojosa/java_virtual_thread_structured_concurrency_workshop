@@ -1,14 +1,21 @@
 package com.evolutionnext.structuredconcurrency;
 
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class UserService {
-    public User findUser(Long id) {
-        System.out.println("findUser: " + Thread.currentThread());
-        return new User("Simon", "Roberts");
+    private final Map<Long, User> users = new ConcurrentHashMap<>();
+
+    public UserService() {
+        users.put(1L, new User("Simon", "Roberts"));
+        users.put(2L, new User("Sharat", "Chander"));
+        users.put(3L, new User("James", "Gosling"));
     }
 
-    public User findUserError(long id) {
-        System.out.println("findUserError: " + Thread.currentThread());
-        throw new RuntimeException("Couldn't find user");
+    public User findUser(Long id) {
+        System.out.println("findUser: " + Thread.currentThread());
+        return Objects.requireNonNull(users.get(id));
     }
 
     public User findUserLongTime(long id) {
@@ -18,6 +25,6 @@ public class UserService {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        return new User("Simon", "Roberts");
+        return users.get(id);
     }
 }
